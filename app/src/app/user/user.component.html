@@ -6,7 +6,7 @@
     <button *ngIf="isUserFavorite(favoriteUsers$ | async)" (click)="removeFromFavorites()">Remove from favorites</button>
     <button *ngIf="isNotUserFavorite(favoriteUsers$ | async)" (click)="addToFavorites()">Add to favorites</button>
   </div>
-
+<!--FIXME Maybe instead of goBack use routerLink -->
   <button (click)="goBack()" class="go-back">Go back to list</button>
 </div>
 

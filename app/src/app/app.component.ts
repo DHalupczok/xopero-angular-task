@@ -11,6 +11,7 @@ import {Subscription} from 'rxjs'
 })
 export class AppComponent {
   title = 'app';
+  //FIXME instead of creating pointless wsSub you can either use takeUntilDestroyed operator or creat sub array and unsub for every element of this array in ngOnDestroy,
   private wsSub!: Subscription;
 
   constructor(private websocketService: WebsocketService) {

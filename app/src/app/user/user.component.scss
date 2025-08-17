@@ -1,9 +1,11 @@
 .user {
+  //FIXME maybe it would be better to use em/rem units?
   padding: 20px;
 }
 
 .buttons {
   display: flex;
+  //FIXME maybe it would be better to use em/rem units?
   gap: 12px;
   flex-direction: row;
 }

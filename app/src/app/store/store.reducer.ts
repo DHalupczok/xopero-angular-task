@@ -10,6 +10,7 @@ export interface State {
 
 export const initialState: State = {
   userAmount: 0,
+  //FIXME avoid using ts-ignore
   // @ts-ignore
   currentUser: null,
   favoriteUsers: [],
@@ -27,6 +28,7 @@ export const userReducer = createReducer(
   })),
   on(removeUserFromFavorite, (state, { user }) => ({
     ...state,
+    //FIXME ts-ignore
     // @ts-ignore
     favoriteUsers: state.favoriteUsers.filter((u) => u.id !== u.id)
   }))

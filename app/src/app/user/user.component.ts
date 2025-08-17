@@ -16,12 +16,13 @@ import {CommonModule} from '@angular/common'
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserComponent {
+  //FIXME avoid using any also You can create observables instead
   userName!: any
   protectedProjects: any = 0
   projectsSub!: Subscription
   userId!: any
   user: any
-
+//FIXME avoid using ts-ignore
   user$ = this.store.select(selectCurrentUser).subscribe(user => {
     //@ts-ignore
     this.userName = user.name
@@ -37,7 +38,7 @@ export class UserComponent {
 
   constructor(public webSocketService: WebsocketService, public router: Router, public store: Store) {
   }
-
+//FIXME You are not implementing OnInit interface
   ngOnInit() {
     this.webSocketService.subject.subscribe(msg => {
       const response = JSON.parse(msg)
@@ -48,22 +49,26 @@ export class UserComponent {
       this.store.dispatch(setCurrentUser({user}))
     })
   }
-
+//FIXME avoid using any
   isUserFavorite(favoriteUsers: any) {
+    //FIXME avoid using ts-ignore
     // @ts-ignore
     return !!favoriteUsers.find(u => u.id === this.userId)
   }
 
   isNotUserFavorite(favoriteUsers: any) {
+    //FIXME avoid using ts-ignore
     // @ts-ignore
     return !favoriteUsers.find(u => u.id === this.userId)
   }
 
   goBack() {
+    //FIXME this redirect does not work, maybe instead of goBack use routerLink ?
     this.router.navigate([])
   }
 
   synchronizeUser() {
+    //FIXME don't make mess in the code with console.logs
     console.log('starting synchronization')
     const message = JSON.stringify({
       type: 'SynchronizeUser',
