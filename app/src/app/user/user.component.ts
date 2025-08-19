@@ -1,74 +1,74 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core'
+import {ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit} from '@angular/core'
 import {WebsocketService} from '../services/websocket.service'
-import {Router} from '@angular/router'
-import {combineLatest, Subscription, tap} from 'rxjs'
-import {userReducer} from 'app/store/store.reducer'
+import {ActivatedRoute, Router, RouterLink} from '@angular/router'
+import {filter, Subscription, switchMap} from 'rxjs'
 import {Store} from '@ngrx/store'
-import {addUserToFavorite, removeUserFromFavorite, setCurrentUser} from 'app/store/store.actions'
-import {selectCurrentUser, selectFavoriteUsers} from 'app/store/store.selectors'
+import {
+  addUserToFavoriteInUserComponent,
+  removeUserFromFavoriteInUserComponent,
+  setCurrentUserInUserComponent
+} from 'app/store/store.actions'
+import {selectCurrentUser, selectFavoriteUsers, selectIsFavoriteUser} from 'app/store/store.selectors'
 import {CommonModule} from '@angular/common'
+import {toSignal} from '@angular/core/rxjs-interop';
+import {UserService} from '../services/user.service';
 
 @Component({
   selector: 'app-user',
   templateUrl: 'user.component.html',
   styleUrls: ['user.component.scss'],
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UserComponent {
-  //FIXME avoid using any also You can create observables instead
-  userName!: any
-  protectedProjects: any = 0
-  projectsSub!: Subscription
-  userId!: any
-  user: any
-//FIXME avoid using ts-ignore
-  user$ = this.store.select(selectCurrentUser).subscribe(user => {
-    //@ts-ignore
-    this.userName = user.name
-    //@ts-ignore
-    this.protectedProjects = user.protectedProjects
-    //@ts-ignore
-    this.userId = user.id
-    //@ts-ignore
-    this.user = user
+export class UserComponent implements OnInit, OnDestroy {
+
+  private subscriptions: Subscription[] = [];
+  private webSocketService = inject(WebsocketService);
+  private userService = inject(UserService)
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private store = inject(Store);
+  user = toSignal(this.store.select(selectCurrentUser).pipe(filter(user => !!user)));
+  userId = computed(() => {
+    const user = this.user()
+    return user ? user.id : ''
   })
+  userName = computed(() => {
+    const user = this.user();
+    return user ? user.name : ''
+  })
+  protectedProjects = computed(() => {
+    const user = this.user();
+    return user ? user.protectedProjects : 0
+  })
+  favoriteUsers = toSignal(this.store.select(selectFavoriteUsers), {initialValue: []})
+  isUserFavorite = toSignal(this.store.select(selectIsFavoriteUser).pipe())
 
-  favoriteUsers$ = this.store.select(selectFavoriteUsers)
-
-  constructor(public webSocketService: WebsocketService, public router: Router, public store: Store) {
+  constructor() {
   }
-//FIXME You are not implementing OnInit interface
+
   ngOnInit() {
-    this.webSocketService.subject.subscribe(msg => {
+    //Perfect would be to install ngrx/effects and use route => dispatchAction => effectWhichFetchesDataViaService => DispatchAction => changeState
+    this.subscriptions.push(this.route.params.pipe(switchMap(params => this.userService.getUser(params['id'])))
+      .subscribe(user => {
+        if (user)
+          this.store.dispatch(setCurrentUserInUserComponent({user}))
+      }))
+    //TODO take a closer look
+    this.subscriptions.push(this.webSocketService.messages.subscribe(msg => {
       const response = JSON.parse(msg)
 
       const user = response.payload
       console.error('Failed to load user: ', user.id)
-
-      this.store.dispatch(setCurrentUser({user}))
-    })
-  }
-//FIXME avoid using any
-  isUserFavorite(favoriteUsers: any) {
-    //FIXME avoid using ts-ignore
-    // @ts-ignore
-    return !!favoriteUsers.find(u => u.id === this.userId)
+    }))
   }
 
-  isNotUserFavorite(favoriteUsers: any) {
-    //FIXME avoid using ts-ignore
-    // @ts-ignore
-    return !favoriteUsers.find(u => u.id === this.userId)
-  }
-
-  goBack() {
-    //FIXME this redirect does not work, maybe instead of goBack use routerLink ?
-    this.router.navigate([])
+  ngOnDestroy() {
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
   synchronizeUser() {
-    //FIXME don't make mess in the code with console.logs
+    //TODO synchronisation funtionality to be implemented
     console.log('starting synchronization')
     const message = JSON.stringify({
       type: 'SynchronizeUser',
@@ -78,11 +78,12 @@ export class UserComponent {
   }
 
   removeFromFavorites() {
-    this.store.dispatch(removeUserFromFavorite({ user: this.user }))
+    const user = this.user();
+    if (user) this.store.dispatch(removeUserFromFavoriteInUserComponent({user}))
   }
 
-  addToFavorites(){
-    this.store.dispatch(addUserToFavorite({user: this.user}))
-
+  addToFavorites() {
+    const user = this.user();
+    if (user) this.store.dispatch(addUserToFavoriteInUserComponent({user}))
   }
 }

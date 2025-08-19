@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {Component, DestroyRef, inject} from '@angular/core';
+import {RouterOutlet} from '@angular/router';
 import {WebsocketService} from './services/websocket.service'
-import {Subscription} from 'rxjs'
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {environment} from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -11,14 +12,15 @@ import {Subscription} from 'rxjs'
 })
 export class AppComponent {
   title = 'app';
-  //FIXME instead of creating pointless wsSub you can either use takeUntilDestroyed operator or creat sub array and unsub for every element of this array in ngOnDestroy,
-  private wsSub!: Subscription;
+  private apiURL = `${environment.websocketsUrl}/notificationHub`;
+  private destroyRef = inject(DestroyRef);
+  private websocketService = inject(WebsocketService);
 
-  constructor(private websocketService: WebsocketService) {
+  constructor() {
   }
 
   ngOnInit() {
-    this.wsSub = this.websocketService.connect('ws://localhost:9334/notificationHub').subscribe(msg => {
+    this.websocketService.connect(this.apiURL).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(msg => {
       console.log("New message:", msg);
     });
   }
