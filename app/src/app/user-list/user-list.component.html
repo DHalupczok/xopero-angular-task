@@ -3,7 +3,7 @@
 
     <ng-container matColumnDef="name">
       <th *matHeaderCellDef mat-header-cell> Name</th>
-      <td *matCellDef="let user" [routerLink]="['', user.id]" class="cursor-pointer" mat-cell>
+      <td *matCellDef="let user" [routerLink]="['', user.id]" class="c ursor-pointer" mat-cell>
         {{ user.name }}
       </td>
     </ng-container>
@@ -22,4 +22,9 @@
     <tr *matRowDef="let row; columns: ['name', 'role', 'protectedProjects'];" mat-row></tr>
 
   </table>
+  <mat-paginator (page)="onPageChange($event)" [length]="total()" [pageSizeOptions]="[5, 10, 20]"
+                 [pageSize]="pageSize()"
+                 aria-label="Select page of periodic elements"
+                 showFirstLastButtons>
+  </mat-paginator>
 </div>
