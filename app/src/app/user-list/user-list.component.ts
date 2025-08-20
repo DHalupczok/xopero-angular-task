@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, ViewChild} from '@angular/core';
 import {UserService} from '../services/user.service';
-import {BehaviorSubject, combineLatest, debounceTime, map, share, startWith, switchMap} from 'rxjs';
+import {BehaviorSubject, combineLatest, map, share, startWith, switchMap} from 'rxjs';
 import {
   MatCell,
   MatCellDef,
@@ -14,6 +14,7 @@ import {
   MatTable,
   MatTableDataSource
 } from '@angular/material/table'
+import {MatIcon} from '@angular/material/icon';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatPaginator, MatPaginatorModule, PageEvent} from '@angular/material/paginator';
@@ -24,6 +25,7 @@ import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {environment} from '../../environments/environment';
 import {MatSort, MatSortHeader, Sort} from '@angular/material/sort';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
+import {selectFavoriteUsers} from '../store/store.selectors';
 
 @Component({
   selector: 'app-user-list',
@@ -49,6 +51,7 @@ import {FormControl, ReactiveFormsModule} from '@angular/forms';
     MatFormFieldModule,
     MatInputModule,
     ReactiveFormsModule,
+    MatIcon,
   ],
 })
 export class UserListComponent implements OnInit {
@@ -63,15 +66,22 @@ export class UserListComponent implements OnInit {
   private router = inject(Router);
   private store = inject(Store);
   private destroyRef = inject(DestroyRef);
-  private filter$ = this.filterText.valueChanges.pipe(startWith(""), debounceTime(1500), map(searchText => searchText ? searchText.toLowerCase() : ''));
+  private filter$ = this.filterText.valueChanges.pipe(startWith(""), map(searchText => searchText ? searchText.toLowerCase() : ''));
   private sort$ = new BehaviorSubject<string>("")
   private params$ = combineLatest([this.filter$, this.pageSetting$, this.sort$])
   private usersResponse$ = this.params$.pipe(switchMap(([filter, pageSettings, sort]) =>
     this.userService.getUsers(filter, pageSettings.page, pageSettings.pageSize, sort)
   ), share())
-  public users = toSignal(this.usersResponse$.pipe(map(usersResponse => new MatTableDataSource(usersResponse.results))));
   public total = toSignal(this.usersResponse$.pipe(map(usersResponse => usersResponse.total)));
   public pageSize = toSignal(this.usersResponse$.pipe(map(usersResponse => usersResponse.pageSize)));
+  private favoriteUser$ = this.store.select(selectFavoriteUsers)
+  private usersWithFavorite$ = combineLatest([this.usersResponse$, this.favoriteUser$])
+    .pipe(map(([users, favorites]) => {
+      const favoritesIds = new Set(favorites.map(favorite => favorite.id));
+      return users.results.map(user => ({...user, isFavorite: favoritesIds.has(user.id)}))
+
+    }))
+  public users = toSignal(this.usersWithFavorite$.pipe(map(usersWithFavorites => new MatTableDataSource(usersWithFavorites))));
 
   constructor() {
   }

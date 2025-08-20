@@ -10,10 +10,7 @@ export const selectCurrentUser = createSelector(
 
 export const selectFavoriteUsers = createSelector(
   selectCounterState,
-  (state) => {
-    console.log("TRALALALa", state)
-    return state.favoriteUsers
-  }
+  (state) => state.favoriteUsers
 );
 
 export const selectIsFavoriteUser = createSelector(

@@ -29,8 +29,23 @@
       <td *matCellDef="let user" mat-cell> {{ user.protectedProjects }}</td>
     </ng-container>
 
-    <tr *matHeaderRowDef="['name', 'role', 'protectedProjects']" mat-header-row></tr>
-    <tr *matRowDef="let row; columns: ['name', 'role', 'protectedProjects'];" mat-row></tr>
+    <ng-container matColumnDef="ifFavoriteUser">
+      <th *matHeaderCellDef mat-header-cell>
+        Is user favorite
+      </th>
+      <td *matCellDef="let user" mat-cell>
+        @if (user.isFavorite) {
+          <mat-icon>star</mat-icon>
+        } @else {
+          <mat-icon>star_border</mat-icon>
+        }
+
+
+      </td>
+    </ng-container>
+
+    <tr *matHeaderRowDef="['name', 'role', 'protectedProjects', 'ifFavoriteUser']" mat-header-row></tr>
+    <tr *matRowDef="let row; columns: ['name', 'role', 'protectedProjects', 'ifFavoriteUser'];" mat-row></tr>
 
   </table>
   <mat-paginator (page)="onPageChange($event)" [length]="total()" [pageSizeOptions]="[5, 10, 20]"
