@@ -1,20 +1,23 @@
 <div>
-  <table [dataSource]="users() || []" class="mat-elevation-z8" mat-table>
+  <table (matSortChange)="onMatSortChange($event)" [dataSource]="users() || []" class="mat-elevation-z8" mat-table
+         matSort>
 
     <ng-container matColumnDef="name">
-      <th *matHeaderCellDef mat-header-cell> Name</th>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header sortActionDescription="Sort by name"> Name</th>
       <td *matCellDef="let user" [routerLink]="['', user.id]" class="c ursor-pointer" mat-cell>
         {{ user.name }}
       </td>
     </ng-container>
 
     <ng-container matColumnDef="role">
-      <th *matHeaderCellDef mat-header-cell> Role</th>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header sortActionDescription="Sort by role"> Role</th>
       <td *matCellDef="let user" mat-cell> {{ user.role }}</td>
     </ng-container>
 
     <ng-container matColumnDef="protectedProjects">
-      <th *matHeaderCellDef mat-header-cell> Protected projects</th>
+      <th *matHeaderCellDef mat-header-cell mat-sort-header sortActionDescription="Sort by protected projects">
+        Protected projects
+      </th>
       <td *matCellDef="let user" mat-cell> {{ user.protectedProjects }}</td>
     </ng-container>
 

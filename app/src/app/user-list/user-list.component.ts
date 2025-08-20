@@ -20,6 +20,7 @@ import {Router, RouterLink} from '@angular/router'
 import {Store} from '@ngrx/store'
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {environment} from '../../environments/environment';
+import {MatSort, MatSortHeader, Sort} from '@angular/material/sort';
 
 @Component({
   selector: 'app-user-list',
@@ -39,12 +40,15 @@ import {environment} from '../../environments/environment';
     MatRowDef,
     RouterLink,
     MatPaginator,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatSortHeader,
+    MatSort
   ],
 })
 export class UserListComponent implements OnInit {
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
   pageSetting$ = new BehaviorSubject<{ page: number, pageSize: number }>({page: 0, pageSize: 10});
   private apiURL = `${environment.websocketsUrl}/notificationHub`;
   private userService = inject(UserService);
@@ -75,5 +79,22 @@ export class UserListComponent implements OnInit {
     const pageSize = event.pageSize;
     const page = event.pageIndex;
     this.pageSetting$.next({page: page + 1, pageSize})
+  }
+
+  onMatSortChange($event: Sort) {
+    const field = $event.active
+    const direction = $event.direction
+    //You are removing old filter is already applied
+    const currentSortFields = this.sort$.getValue().split(',').filter(sortField => !sortField.includes(field));
+
+    //When direction is empty string than You should not add this filter.
+    if (!direction) {
+      this.sort$.next(currentSortFields.join(','))
+      return
+    }
+    const newSortField = `${direction === 'desc' ? '-' : ''}${field}`
+    currentSortFields.push(newSortField);
+    this.sort$.next(currentSortFields.join(','))
+    console.log("Sort change:", $event);
   }
 }
