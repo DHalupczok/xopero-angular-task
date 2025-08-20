@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, ViewChild} from '@angular/core';
 import {UserService} from '../services/user.service';
-import {BehaviorSubject, combineLatest, map, share, startWith, switchMap} from 'rxjs';
+import {BehaviorSubject, combineLatest, debounceTime, map, share, startWith, switchMap} from 'rxjs';
 import {
   MatCell,
   MatCellDef,
@@ -59,14 +59,14 @@ export class UserListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   pageSetting$ = new BehaviorSubject<{ page: number, pageSize: number }>({page: 0, pageSize: 10});
-  public filterText = new FormControl('')
+  public filterText = new FormControl("")
   private apiURL = `${environment.websocketsUrl}/notificationHub`;
   private userService = inject(UserService);
   private websocketService = inject(WebsocketService);
   private router = inject(Router);
   private store = inject(Store);
   private destroyRef = inject(DestroyRef);
-  private filter$ = this.filterText.valueChanges.pipe(startWith(""), map(searchText => searchText ? searchText.toLowerCase() : ''));
+  private filter$ = this.filterText.valueChanges.pipe(debounceTime(1500), startWith(null), map(searchText => searchText ? searchText.toLowerCase() : ''));
   private sort$ = new BehaviorSubject<string>("")
   private params$ = combineLatest([this.filter$, this.pageSetting$, this.sort$])
   private usersResponse$ = this.params$.pipe(switchMap(([filter, pageSettings, sort]) =>
