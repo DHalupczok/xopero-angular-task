@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, ViewChild} from '@angular/core';
 import {UserService} from '../services/user.service';
-import {BehaviorSubject, combineLatest, map, share, switchMap} from 'rxjs';
+import {BehaviorSubject, combineLatest, debounceTime, map, share, startWith, switchMap} from 'rxjs';
 import {
   MatCell,
   MatCellDef,
@@ -14,6 +14,8 @@ import {
   MatTable,
   MatTableDataSource
 } from '@angular/material/table'
+import {MatInputModule} from '@angular/material/input';
+import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatPaginator, MatPaginatorModule, PageEvent} from '@angular/material/paginator';
 import {WebsocketService} from '../services/websocket.service'
 import {Router, RouterLink} from '@angular/router'
@@ -21,6 +23,7 @@ import {Store} from '@ngrx/store'
 import {takeUntilDestroyed, toSignal} from '@angular/core/rxjs-interop';
 import {environment} from '../../environments/environment';
 import {MatSort, MatSortHeader, Sort} from '@angular/material/sort';
+import {FormControl, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-user-list',
@@ -42,7 +45,10 @@ import {MatSort, MatSortHeader, Sort} from '@angular/material/sort';
     MatPaginator,
     MatPaginatorModule,
     MatSortHeader,
-    MatSort
+    MatSort,
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
   ],
 })
 export class UserListComponent implements OnInit {
@@ -50,13 +56,14 @@ export class UserListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   pageSetting$ = new BehaviorSubject<{ page: number, pageSize: number }>({page: 0, pageSize: 10});
+  public filterText = new FormControl('')
   private apiURL = `${environment.websocketsUrl}/notificationHub`;
   private userService = inject(UserService);
   private websocketService = inject(WebsocketService);
   private router = inject(Router);
   private store = inject(Store);
   private destroyRef = inject(DestroyRef);
-  private filter$ = new BehaviorSubject<string>("")
+  private filter$ = this.filterText.valueChanges.pipe(startWith(""), debounceTime(1500), map(searchText => searchText ? searchText.toLowerCase() : ''));
   private sort$ = new BehaviorSubject<string>("")
   private params$ = combineLatest([this.filter$, this.pageSetting$, this.sort$])
   private usersResponse$ = this.params$.pipe(switchMap(([filter, pageSettings, sort]) =>

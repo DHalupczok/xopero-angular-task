@@ -1,4 +1,12 @@
 <div>
+  <form>
+    <mat-form-field class="example-full-width">
+      <mat-label>Search</mat-label>
+      <input [formControl]="filterText" matInput placeholder="Ex. Pizza">
+    </mat-form-field>
+  </form>
+
+
   <table (matSortChange)="onMatSortChange($event)" [dataSource]="users() || []" class="mat-elevation-z8" mat-table
          matSort>
 
