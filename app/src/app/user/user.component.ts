@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit} from '@angular/core'
 import {WebsocketService} from '../services/websocket.service'
-import {ActivatedRoute, Router, RouterLink} from '@angular/router'
+import {ActivatedRoute, RouterLink} from '@angular/router'
 import {filter, Subscription, switchMap} from 'rxjs'
 import {Store} from '@ngrx/store'
 import {
@@ -25,7 +25,6 @@ export class UserComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private webSocketService = inject(WebsocketService);
   private userService = inject(UserService)
-  private router = inject(Router);
   private route = inject(ActivatedRoute);
   private store = inject(Store);
   user = toSignal(this.store.select(selectCurrentUser).pipe(filter(user => !!user)));
@@ -54,13 +53,6 @@ export class UserComponent implements OnInit, OnDestroy {
         if (user)
           this.store.dispatch(setCurrentUserInUserComponent({user}))
       }))
-    //TODO take a closer look
-    this.subscriptions.push(this.webSocketService.messages.subscribe(msg => {
-      const response = JSON.parse(msg)
-
-      const user = response.payload
-      console.error('Failed to load user: ', user.id)
-    }))
   }
 
   ngOnDestroy() {
@@ -68,8 +60,6 @@ export class UserComponent implements OnInit, OnDestroy {
   }
 
   synchronizeUser() {
-    //TODO synchronisation funtionality to be implemented
-    console.log('starting synchronization')
     const message = JSON.stringify({
       type: 'SynchronizeUser',
       payload: this.userName,

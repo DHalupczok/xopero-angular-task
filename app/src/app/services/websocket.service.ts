@@ -1,5 +1,6 @@
 import {inject, Injectable, NgZone} from '@angular/core';
 import {Observable, Subject} from 'rxjs';
+import {ReceiveMessageModel} from '../models/receiveMessage.model';
 
 @Injectable({
   providedIn: 'root'
@@ -7,7 +8,7 @@ import {Observable, Subject} from 'rxjs';
 export class WebsocketService {
 
 
-  private subject = new Subject<string>();
+  private subject = new Subject<ReceiveMessageModel>();
   public messages = this.subject.asObservable()
   private ngZone = inject(NgZone);
   private socket?: WebSocket;
@@ -15,11 +16,12 @@ export class WebsocketService {
   constructor() {
   }
 
-  public connect(url: string): Observable<string> {
+  public connect(url: string): Observable<ReceiveMessageModel> {
     this.socket = new WebSocket(url);
     this.socket.onmessage = (event) => {
       this.ngZone.run(() => {
-        this.subject.next(event.data);
+        const {type, payload} = JSON.parse(event.data);
+        this.subject.next({type, payload: new Date(payload)});
       });
     };
 
