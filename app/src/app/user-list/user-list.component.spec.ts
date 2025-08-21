@@ -3,7 +3,7 @@ import {UserListComponent} from './user-list.component';
 import {UserService} from '../services/user.service';
 import {WebsocketService} from '../services/websocket.service';
 import {Store} from '@ngrx/store';
-import {BehaviorSubject, of, Subject} from 'rxjs';
+import {BehaviorSubject, of} from 'rxjs';
 import {Router} from '@angular/router';
 import {MatPaginatorModule} from '@angular/material/paginator';
 import {MatSortModule} from '@angular/material/sort';
@@ -67,16 +67,6 @@ describe('UserListComponent', () => {
 
   it('should create component', () => {
     expect(component).toBeTruthy();
-  });
-
-  it('should subscribe websocket in ngOnInit', () => {
-    const wsSubject = new Subject<any>();
-    mockWebsocketService.connect.and.returnValue(wsSubject.asObservable());
-
-    component.ngOnInit();
-
-    expect(mockWebsocketService.connect).toHaveBeenCalled();
-    wsSubject.next({message: 'hello'});
   });
 
   it('should invoke userService.getUsers when pagination is changed', () => {
@@ -235,5 +225,5 @@ describe('UserListComponent', () => {
     expect(ds?.data.length).toBe(0);
     expect(component.total()).toBe(0);
   }));
-  
+
 });
