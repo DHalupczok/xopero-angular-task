@@ -11,6 +11,8 @@ import {MatTableModule} from '@angular/material/table';
 import {ReactiveFormsModule} from '@angular/forms';
 import {UserModel} from '../models/user.model';
 import {selectFavoriteUsers} from '../store/store.selectors';
+import {provideI18Next, StrictErrorHandlingStrategy, withCustomErrorHandlingStrategy} from 'angular-i18next';
+
 
 describe('UserListComponent', () => {
   let component: UserListComponent;
@@ -57,6 +59,9 @@ describe('UserListComponent', () => {
         {provide: WebsocketService, useValue: mockWebsocketService},
         {provide: Store, useValue: mockStore},
         {provide: Router, useValue: mockRouter},
+        provideI18Next(
+          withCustomErrorHandlingStrategy(StrictErrorHandlingStrategy)
+        )
       ]
     }).compileComponents();
 
