@@ -12,22 +12,17 @@ import {selectCurrentUser, selectFavoriteUsers, selectIsFavoriteUser} from 'app/
 import {CommonModule} from '@angular/common'
 import {toSignal} from '@angular/core/rxjs-interop';
 import {UserService} from '../services/user.service';
+import {I18NextPipe} from 'angular-i18next';
 
 @Component({
   selector: 'app-user',
   templateUrl: 'user.component.html',
   styleUrls: ['user.component.scss'],
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, I18NextPipe],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserComponent implements OnInit, OnDestroy {
 
-  private subscriptions: Subscription[] = [];
-  private webSocketService = inject(WebsocketService);
-  private userService = inject(UserService)
-  private route = inject(ActivatedRoute);
-  private store = inject(Store);
-  user = toSignal(this.store.select(selectCurrentUser).pipe(filter(user => !!user)));
   userId = computed(() => {
     const user = this.user()
     return user ? user.id : ''
@@ -40,6 +35,12 @@ export class UserComponent implements OnInit, OnDestroy {
     const user = this.user();
     return user ? user.protectedProjects : 0
   })
+  private subscriptions: Subscription[] = [];
+  private webSocketService = inject(WebsocketService);
+  private userService = inject(UserService)
+  private route = inject(ActivatedRoute);
+  private store = inject(Store);
+  user = toSignal(this.store.select(selectCurrentUser).pipe(filter(user => !!user)));
   favoriteUsers = toSignal(this.store.select(selectFavoriteUsers), {initialValue: []})
   isUserFavorite = toSignal(this.store.select(selectIsFavoriteUser).pipe())
 

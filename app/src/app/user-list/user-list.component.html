@@ -1,8 +1,8 @@
 <div>
   <form>
     <mat-form-field class="example-full-width">
-      <mat-label>Search</mat-label>
-      <input [formControl]="filterText" matInput placeholder="Ex. Pizza">
+      <mat-label>{{ 'search' | i18next }}</mat-label>
+      <input [formControl]="filterText" [placeholder]="'searchPlaceholder' | i18next" matInput>
     </mat-form-field>
   </form>
 
@@ -11,27 +11,32 @@
          matSort>
 
     <ng-container matColumnDef="name">
-      <th *matHeaderCellDef mat-header-cell mat-sort-header sortActionDescription="Sort by name"> Name</th>
-      <td *matCellDef="let user" [routerLink]="['', user.id]" class="c ursor-pointer" mat-cell>
+      <th *matHeaderCellDef [sortActionDescription]="'sortByName' | i18next" mat-header-cell
+          mat-sort-header>{{ 'nameColumn' | i18next }}
+      </th>
+      <td *matCellDef="let user" [routerLink]="['', user.id]" class="cursor-pointer" mat-cell>
         {{ user.name }}
       </td>
     </ng-container>
 
     <ng-container matColumnDef="role">
-      <th *matHeaderCellDef mat-header-cell mat-sort-header sortActionDescription="Sort by role"> Role</th>
+      <th *matHeaderCellDef [sortActionDescription]="'sortByRole' | i18next" mat-header-cell
+          mat-sort-header>{{ 'role' | i18next }}
+      </th>
       <td *matCellDef="let user" mat-cell> {{ user.role }}</td>
     </ng-container>
 
     <ng-container matColumnDef="protectedProjects">
-      <th *matHeaderCellDef mat-header-cell mat-sort-header sortActionDescription="Sort by protected projects">
-        Protected projects
+      <th *matHeaderCellDef [sortActionDescription]="'sortByProtectedProjects' | i18next" mat-header-cell
+          mat-sort-header>
+        {{ 'protectedProjects' | i18next }}
       </th>
       <td *matCellDef="let user" mat-cell> {{ user.protectedProjects }}</td>
     </ng-container>
 
     <ng-container matColumnDef="ifFavoriteUser">
       <th *matHeaderCellDef mat-header-cell>
-        Is user favorite
+        {{ 'isUserFavorite' | i18next }}
       </th>
       <td *matCellDef="let user" mat-cell>
         @if (user.isFavorite) {

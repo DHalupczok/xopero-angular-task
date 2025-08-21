@@ -24,6 +24,7 @@ import {toSignal} from '@angular/core/rxjs-interop';
 import {MatSort, MatSortHeader, Sort} from '@angular/material/sort';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {selectFavoriteUsers} from '../store/store.selectors';
+import {I18NextPipe} from 'angular-i18next';
 
 @Component({
   selector: 'app-user-list',
@@ -50,6 +51,7 @@ import {selectFavoriteUsers} from '../store/store.selectors';
     MatInputModule,
     ReactiveFormsModule,
     MatIcon,
+    I18NextPipe,
   ],
 })
 export class UserListComponent {
